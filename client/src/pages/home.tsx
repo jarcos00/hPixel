@@ -75,10 +75,11 @@ export default function Home() {
       </div>
 
       {/* Content overlay */}
-      <div className="relative z-10 min-h-screen w-full p-4 flex flex-col items-center gap-4">
-        <h1 className="text-2xl font-light text-foreground">Halliday Gradient</h1>
+      <div className="relative z-10 min-h-screen w-full p-4">
+        <h1 className="text-2xl font-light text-foreground text-center">Halliday Gradient</h1>
 
-        <div className="mt-auto w-full max-w-6xl">
+        {/* Controls Sidebar */}
+        <div className="fixed left-0 top-0 h-full max-w-[25vw] p-4">
           {!isControlsVisible ? (
             <Button 
               className="w-full py-2 bg-white hover:bg-gray-100 text-gray-800"
@@ -88,7 +89,7 @@ export default function Home() {
               Show Controls
             </Button>
           ) : (
-            <Card className="p-6" style={{ background: '#FFF !important', border: 'none !important', borderRadius: '12px' }}>
+            <Card className="h-full p-6 overflow-y-auto" style={{ background: '#FFF !important', border: 'none !important', borderRadius: '12px' }}>
               <div className="flex justify-end mb-4">
                 <Button 
                   className="bg-white hover:bg-gray-100 text-gray-800"
