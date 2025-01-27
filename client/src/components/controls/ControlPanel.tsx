@@ -24,6 +24,26 @@ export default function ControlPanel({ settings, onSettingsChange }: Props) {
     });
   };
 
+  const handleSpacingChange = (value: number[]) => {
+    onSettingsChange({
+      ...settings,
+      tileSpacing: value[0]
+    });
+  };
+
+  const handleColorChange = (type: 'backgroundColor' | 'artColor', value: string) => {
+    // Remove # if present for validation
+    const colorValue = value.replace('#', '');
+
+    // Only update if it's a valid hex color or empty
+    if (/^[0-9A-Fa-f]{0,6}$/.test(colorValue)) {
+      onSettingsChange({
+        ...settings,
+        [type]: '#' + colorValue
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -54,28 +74,48 @@ export default function ControlPanel({ settings, onSettingsChange }: Props) {
 
       <div className="space-y-2">
         <Label>Background Color</Label>
-        <Input
-          type="color"
-          value={settings.backgroundColor}
-          onChange={(e) => onSettingsChange({
-            ...settings,
-            backgroundColor: e.target.value
-          })}
-          className="w-full h-10"
-        />
+        <div className="flex gap-2">
+          <Input
+            type="color"
+            value={settings.backgroundColor}
+            onChange={(e) => onSettingsChange({
+              ...settings,
+              backgroundColor: e.target.value
+            })}
+            className="w-14 h-10 p-1"
+          />
+          <Input
+            type="text"
+            value={settings.backgroundColor.replace('#', '')}
+            onChange={(e) => handleColorChange('backgroundColor', e.target.value)}
+            placeholder="FFFFFF"
+            maxLength={6}
+            className="flex-1"
+          />
+        </div>
       </div>
 
       <div className="space-y-2">
         <Label>Art Color</Label>
-        <Input
-          type="color"
-          value={settings.artColor}
-          onChange={(e) => onSettingsChange({
-            ...settings,
-            artColor: e.target.value
-          })}
-          className="w-full h-10"
-        />
+        <div className="flex gap-2">
+          <Input
+            type="color"
+            value={settings.artColor}
+            onChange={(e) => onSettingsChange({
+              ...settings,
+              artColor: e.target.value
+            })}
+            className="w-14 h-10 p-1"
+          />
+          <Input
+            type="text"
+            value={settings.artColor.replace('#', '')}
+            onChange={(e) => handleColorChange('artColor', e.target.value)}
+            placeholder="000000"
+            maxLength={6}
+            className="flex-1"
+          />
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -85,6 +125,18 @@ export default function ControlPanel({ settings, onSettingsChange }: Props) {
           onValueChange={handlePixelSizeChange}
           min={5}
           max={50}
+          step={1}
+          className="w-full"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Tile Spacing ({settings.tileSpacing}px)</Label>
+        <Slider
+          value={[settings.tileSpacing]}
+          onValueChange={handleSpacingChange}
+          min={0}
+          max={10}
           step={1}
           className="w-full"
         />

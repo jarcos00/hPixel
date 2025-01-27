@@ -10,6 +10,7 @@ export interface GradientSettings {
   backgroundColor: string;
   artColor: string;
   pixelSize: number;
+  tileSpacing: number;  // Added tileSpacing
 }
 
 export default function Home() {
@@ -17,18 +18,19 @@ export default function Home() {
     effectMode: "wavy",
     backgroundColor: "#ffffff",
     artColor: "#000000",
-    pixelSize: 20
+    pixelSize: 20,
+    tileSpacing: 1  // Default spacing
   });
 
   return (
     <div className="min-h-screen w-full p-4 bg-background flex flex-col items-center gap-4">
       <h1 className="text-2xl font-light text-foreground">Pixel Gradient Generator</h1>
-      
+
       <div className="w-full max-w-4xl flex flex-col md:flex-row gap-4">
         <Card className="flex-1 p-4 aspect-square">
           <GradientCanvas settings={settings} />
         </Card>
-        
+
         <Card className="md:w-80 p-4">
           <ControlPanel settings={settings} onSettingsChange={setSettings} />
         </Card>
