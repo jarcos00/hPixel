@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Video, Download, Square, Image, Play } from "lucide-react";
 import { GradientSettings } from "@/pages/home";
-import { exportLottie } from "@/lib/gradientEffects";
+import { generateLottieAnimation } from "@/lib/gradientEffects";
+import { useToast } from "@/hooks/use-toast";
 
 interface Props {
   settings: GradientSettings;
@@ -13,6 +14,8 @@ interface Props {
 export default function RecordingPanel({ settings, onSettingsChange }: Props) {
   const [duration, setDuration] = useState(0);
   const [recordingStartTime, setRecordingStartTime] = useState<number | null>(null);
+  const recordedFramesRef = useRef<{ time: number; pixels: { x: number; y: number; opacity: number }[] }[]>([]);
+  const { toast } = useToast();
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -33,6 +36,7 @@ export default function RecordingPanel({ settings, onSettingsChange }: Props) {
   const handleStartRecording = () => {
     setRecordingStartTime(Date.now());
     setDuration(0);
+    recordedFramesRef.current = [];
     onSettingsChange({
       ...settings,
       isRecording: true
@@ -47,8 +51,23 @@ export default function RecordingPanel({ settings, onSettingsChange }: Props) {
     });
   };
 
+  const handleFrameCapture = (frameData: { time: number; pixels: { x: number; y: number; opacity: number }[] }) => {
+    if (settings.isRecording) {
+      recordedFramesRef.current.push(frameData);
+    }
+  };
+
   const handleExportLottie = () => {
-    const lottieData = exportLottie(settings);
+    if (recordedFramesRef.current.length === 0) {
+      toast({
+        title: "No recording available",
+        description: "Please record an animation before exporting to Lottie.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const lottieData = generateLottieAnimation(recordedFramesRef.current, settings);
     const blob = new Blob([JSON.stringify(lottieData)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -56,6 +75,11 @@ export default function RecordingPanel({ settings, onSettingsChange }: Props) {
     a.download = `halliday-gradient-${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
+
+    toast({
+      title: "Lottie animation exported",
+      description: "Your gradient animation has been saved as a Lottie JSON file.",
+    });
   };
 
   const handleExportSVG = () => {

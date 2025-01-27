@@ -5,15 +5,17 @@ import { useToast } from "@/hooks/use-toast";
 
 interface Props {
   settings: GradientSettings;
+  onFrameCapture?: (frameData: { time: number; pixels: { x: number; y: number; opacity: number }[] }) => void;
 }
 
-export default function GradientCanvas({ settings }: Props) {
+export default function GradientCanvas({ settings, onFrameCapture }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
   const timeRef = useRef<number>(0);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const { toast } = useToast();
+  const startTimeRef = useRef<number>(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -26,16 +28,11 @@ export default function GradientCanvas({ settings }: Props) {
       const container = canvas.parentElement;
       if (!container) return;
 
-      // Set canvas size to match container
-      canvas.width = 1920; // Fixed internal resolution
+      canvas.width = 1920;
       canvas.height = 1080;
-
-      // Set display size to fill container
       canvas.style.width = '100%';
       canvas.style.height = '100%';
       canvas.style.objectFit = 'cover';
-
-      // Set CSS to prevent blurry rendering
       canvas.style.imageRendering = 'pixelated';
     };
 
@@ -48,9 +45,23 @@ export default function GradientCanvas({ settings }: Props) {
       const deltaTime = timestamp - timeRef.current;
       timeRef.current = timestamp;
 
-      generateGradient(ctx, settings, deltaTime);
+      // Get frame data if recording
+      if (settings.isRecording && onFrameCapture) {
+        const frameTime = (timestamp - startTimeRef.current) / 1000; // Convert to seconds
+        const frameData = generateGradient(ctx, settings, deltaTime, true);
+        if (frameData) {
+          onFrameCapture({ time: frameTime, pixels: frameData });
+        }
+      } else {
+        generateGradient(ctx, settings, deltaTime, false);
+      }
+
       animationRef.current = requestAnimationFrame(animate);
     };
+
+    if (settings.isRecording) {
+      startTimeRef.current = performance.now();
+    }
 
     animationRef.current = requestAnimationFrame(animate);
 
@@ -60,7 +71,7 @@ export default function GradientCanvas({ settings }: Props) {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [settings]);
+  }, [settings, onFrameCapture]);
 
   // Handle recording state changes
   useEffect(() => {
@@ -69,15 +80,13 @@ export default function GradientCanvas({ settings }: Props) {
 
     if (settings.isRecording && !mediaRecorderRef.current) {
       // Start recording
-      const stream = canvas.captureStream(24); // 24fps
+      const stream = canvas.captureStream(24);
       const videoTrack = stream.getVideoTracks()[0];
-
-      // Create a new MediaStream with only the video track
       const videoStream = new MediaStream([videoTrack]);
 
       const mediaRecorder = new MediaRecorder(videoStream, {
-        mimeType: 'video/mp4; codecs="avc1.42E01E"', // H.264 codec
-        videoBitsPerSecond: 8000000 // 8Mbps for high quality
+        mimeType: 'video/webm;codecs=h264',
+        videoBitsPerSecond: 8000000
       });
 
       mediaRecorder.ondataavailable = (e) => {
@@ -87,17 +96,17 @@ export default function GradientCanvas({ settings }: Props) {
       };
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: 'video/mp4' });
+        const blob = new Blob(chunksRef.current, { type: 'video/webm' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `halliday-gradient-${Date.now()}.mp4`;
+        a.download = `halliday-gradient-${Date.now()}.webm`;
         a.click();
         URL.revokeObjectURL(url);
         chunksRef.current = [];
         toast({
           title: "Recording saved",
-          description: "Your gradient animation has been saved as an MP4 file.",
+          description: "Your gradient animation has been saved as a video file.",
         });
       };
 
