@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import GradientCanvas from "@/components/canvas/GradientCanvas";
 import ControlPanel from "@/components/controls/ControlPanel";
+import RecordingPanel from "@/components/controls/RecordingPanel";
 import { useState } from "react";
 
 export type EffectMode = "wavy" | "orbit" | "chaotic" | "free";
@@ -11,6 +12,7 @@ export interface GradientSettings {
   artColor: string;
   pixelSize: number;
   tileSpacing: number;
+  isRecording: boolean;
 }
 
 export default function Home() {
@@ -19,7 +21,8 @@ export default function Home() {
     backgroundColor: "#FFFFFF",
     artColor: "#3DF57B",
     pixelSize: 40,
-    tileSpacing: 0
+    tileSpacing: 0,
+    isRecording: false
   });
 
   const handleSettingsChange = (newSettings: GradientSettings) => {
@@ -43,7 +46,10 @@ export default function Home() {
         </Card>
 
         <Card className="p-6">
-          <ControlPanel settings={settings} onSettingsChange={handleSettingsChange} />
+          <div className="flex flex-col gap-6">
+            <RecordingPanel settings={settings} onSettingsChange={handleSettingsChange} />
+            <ControlPanel settings={settings} onSettingsChange={handleSettingsChange} />
+          </div>
         </Card>
       </div>
     </div>

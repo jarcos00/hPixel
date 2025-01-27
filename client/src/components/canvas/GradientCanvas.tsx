@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { GradientSettings } from "@/pages/home";
 import { generateGradient } from "@/lib/gradientEffects";
+import { useToast } from "@/hooks/use-toast";
 
 interface Props {
   settings: GradientSettings;
@@ -10,6 +11,9 @@ export default function GradientCanvas({ settings }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
   const timeRef = useRef<number>(0);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const { toast } = useToast();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -60,6 +64,53 @@ export default function GradientCanvas({ settings }: Props) {
       }
     };
   }, [settings]);
+
+  // Handle recording state changes
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    if (settings.isRecording && !mediaRecorderRef.current) {
+      // Start recording
+      const stream = canvas.captureStream(24); // 24fps
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'video/webm',
+        videoBitsPerSecond: 8000000 // 8Mbps for high quality
+      });
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          chunksRef.current.push(e.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `halliday-gradient-${Date.now()}.webm`;
+        a.click();
+        URL.revokeObjectURL(url);
+        chunksRef.current = [];
+        toast({
+          title: "Recording saved",
+          description: "Your gradient animation has been saved as a video file.",
+        });
+      };
+
+      mediaRecorderRef.current = mediaRecorder;
+      mediaRecorder.start();
+      toast({
+        title: "Recording started",
+        description: "Recording your gradient animation...",
+      });
+    } else if (!settings.isRecording && mediaRecorderRef.current) {
+      // Stop recording
+      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current = null;
+    }
+  }, [settings.isRecording, toast]);
 
   return (
     <canvas 
