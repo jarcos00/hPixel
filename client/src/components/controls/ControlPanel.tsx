@@ -45,13 +45,13 @@ export default function ControlPanel({ settings, onSettingsChange }: Props) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div className="space-y-2">
         <Label>Effect Mode</Label>
         <RadioGroup
           value={settings.effectMode}
           onValueChange={handleEffectChange}
-          className="flex flex-col space-y-2"
+          className="flex flex-row md:flex-col space-x-4 md:space-x-0 md:space-y-2"
         >
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="wavy" id="wavy" />
@@ -72,74 +72,78 @@ export default function ControlPanel({ settings, onSettingsChange }: Props) {
         </RadioGroup>
       </div>
 
-      <div className="space-y-2">
-        <Label>Background Color</Label>
-        <div className="flex gap-2">
-          <Input
-            type="color"
-            value={settings.backgroundColor}
-            onChange={(e) => onSettingsChange({
-              ...settings,
-              backgroundColor: e.target.value
-            })}
-            className="w-14 h-10 p-1"
-          />
-          <Input
-            type="text"
-            value={settings.backgroundColor.replace('#', '')}
-            onChange={(e) => handleColorChange('backgroundColor', e.target.value)}
-            placeholder="FFFFFF"
-            maxLength={6}
-            className="flex-1"
-          />
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label>Background Color</Label>
+          <div className="flex gap-2">
+            <Input
+              type="color"
+              value={settings.backgroundColor}
+              onChange={(e) => onSettingsChange({
+                ...settings,
+                backgroundColor: e.target.value
+              })}
+              className="w-14 h-10 p-1"
+            />
+            <Input
+              type="text"
+              value={settings.backgroundColor.replace('#', '')}
+              onChange={(e) => handleColorChange('backgroundColor', e.target.value)}
+              placeholder="FFFFFF"
+              maxLength={6}
+              className="flex-1"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Art Color</Label>
+          <div className="flex gap-2">
+            <Input
+              type="color"
+              value={settings.artColor}
+              onChange={(e) => onSettingsChange({
+                ...settings,
+                artColor: e.target.value
+              })}
+              className="w-14 h-10 p-1"
+            />
+            <Input
+              type="text"
+              value={settings.artColor.replace('#', '')}
+              onChange={(e) => handleColorChange('artColor', e.target.value)}
+              placeholder="000000"
+              maxLength={6}
+              className="flex-1"
+            />
+          </div>
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label>Art Color</Label>
-        <div className="flex gap-2">
-          <Input
-            type="color"
-            value={settings.artColor}
-            onChange={(e) => onSettingsChange({
-              ...settings,
-              artColor: e.target.value
-            })}
-            className="w-14 h-10 p-1"
-          />
-          <Input
-            type="text"
-            value={settings.artColor.replace('#', '')}
-            onChange={(e) => handleColorChange('artColor', e.target.value)}
-            placeholder="000000"
-            maxLength={6}
-            className="flex-1"
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label>Pixel Size ({settings.pixelSize}px)</Label>
+          <Slider
+            value={[settings.pixelSize]}
+            onValueChange={handlePixelSizeChange}
+            min={5}
+            max={50}
+            step={1}
+            className="w-full"
           />
         </div>
-      </div>
 
-      <div className="space-y-2">
-        <Label>Pixel Size ({settings.pixelSize}px)</Label>
-        <Slider
-          value={[settings.pixelSize]}
-          onValueChange={handlePixelSizeChange}
-          min={5}
-          max={50}
-          step={1}
-          className="w-full"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label>Tile Spacing ({settings.tileSpacing}px)</Label>
-        <Slider
-          value={[settings.tileSpacing]}
-          onValueChange={handleSpacingChange}
-          min={0}
-          max={10}
-          step={1}
-          className="w-full"
-        />
+        <div className="space-y-2">
+          <Label>Tile Spacing ({settings.tileSpacing}px)</Label>
+          <Slider
+            value={[settings.tileSpacing]}
+            onValueChange={handleSpacingChange}
+            min={0}
+            max={10}
+            step={1}
+            className="w-full"
+          />
+        </div>
       </div>
     </div>
   );

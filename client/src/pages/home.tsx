@@ -35,14 +35,14 @@ export default function Home() {
     <div className="min-h-screen w-full p-4 bg-background flex flex-col items-center gap-4">
       <h1 className="text-2xl font-light text-foreground">Halliday Gradient</h1>
 
-      <div className="w-full max-w-4xl flex flex-col md:flex-row gap-4">
-        <Card className="flex-1 p-4">
+      <div className="w-full max-w-6xl flex flex-col gap-4">
+        <Card className="p-4">
           <div className="aspect-video w-full">
             <GradientCanvas settings={settings} />
           </div>
         </Card>
 
-        <Card className="md:w-80 p-4">
+        <Card className="p-6">
           <ControlPanel settings={settings} onSettingsChange={handleSettingsChange} />
         </Card>
       </div>
