@@ -21,10 +21,21 @@ export default function GradientCanvas({ settings }: Props) {
     const resizeCanvas = () => {
       const container = canvas.parentElement;
       if (!container) return;
-      
-      const size = Math.min(container.clientWidth, container.clientHeight);
-      canvas.width = size;
-      canvas.height = size;
+
+      // Set canvas size to 16:9 aspect ratio
+      const width = container.clientWidth;
+      const height = width * (9/16);
+
+      // For high-quality exports, use 1920x1080 as internal resolution
+      canvas.width = 1920;
+      canvas.height = 1080;
+
+      // Set display size
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+
+      // Set CSS to prevent blurry rendering
+      canvas.style.imageRendering = 'pixelated';
     };
 
     resizeCanvas();
@@ -32,7 +43,7 @@ export default function GradientCanvas({ settings }: Props) {
 
     const animate = (timestamp: number) => {
       if (!ctx) return;
-      
+
       const deltaTime = timestamp - timeRef.current;
       timeRef.current = timestamp;
 

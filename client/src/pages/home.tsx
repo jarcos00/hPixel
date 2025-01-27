@@ -10,29 +10,40 @@ export interface GradientSettings {
   backgroundColor: string;
   artColor: string;
   pixelSize: number;
-  tileSpacing: number;  // Added tileSpacing
+  tileSpacing: number;
 }
 
 export default function Home() {
   const [settings, setSettings] = useState<GradientSettings>({
     effectMode: "wavy",
-    backgroundColor: "#ffffff",
-    artColor: "#000000",
-    pixelSize: 20,
-    tileSpacing: 1  // Default spacing
+    backgroundColor: "#FFFFFF",
+    artColor: "#3DF57B",
+    pixelSize: 40,
+    tileSpacing: 0
   });
+
+  const handleSettingsChange = (newSettings: GradientSettings) => {
+    // Ensure pixel size is always a perfect square
+    const perfectSquare = Math.floor(Math.sqrt(newSettings.pixelSize)) ** 2;
+    setSettings({
+      ...newSettings,
+      pixelSize: perfectSquare
+    });
+  };
 
   return (
     <div className="min-h-screen w-full p-4 bg-background flex flex-col items-center gap-4">
-      <h1 className="text-2xl font-light text-foreground">Pixel Gradient Generator</h1>
+      <h1 className="text-2xl font-light text-foreground">Halliday Gradient</h1>
 
       <div className="w-full max-w-4xl flex flex-col md:flex-row gap-4">
-        <Card className="flex-1 p-4 aspect-square">
-          <GradientCanvas settings={settings} />
+        <Card className="flex-1 p-4">
+          <div className="aspect-video w-full">
+            <GradientCanvas settings={settings} />
+          </div>
         </Card>
 
         <Card className="md:w-80 p-4">
-          <ControlPanel settings={settings} onSettingsChange={setSettings} />
+          <ControlPanel settings={settings} onSettingsChange={handleSettingsChange} />
         </Card>
       </div>
     </div>
