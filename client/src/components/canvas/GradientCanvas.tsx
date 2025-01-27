@@ -23,9 +23,6 @@ export default function GradientCanvas({ settings }: Props) {
     if (!ctx) return;
 
     const resizeCanvas = () => {
-      const container = canvas.parentElement;
-      if (!container) return;
-
       canvas.width = 1920;
       canvas.height = 1080;
       canvas.style.width = '100%';
@@ -36,6 +33,9 @@ export default function GradientCanvas({ settings }: Props) {
 
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
+
+    // Initial render to prevent black frame
+    generateGradient(ctx, settings, 0);
 
     const animate = (timestamp: number) => {
       if (!ctx) return;
@@ -63,43 +63,45 @@ export default function GradientCanvas({ settings }: Props) {
     if (!canvas) return;
 
     if (settings.isRecording && !mediaRecorderRef.current) {
-      // Start recording
-      const stream = canvas.captureStream(24); // 24fps
-      const videoTrack = stream.getVideoTracks()[0];
-      const videoStream = new MediaStream([videoTrack]);
+      // Ensure initial frame is rendered before starting recording
+      setTimeout(() => {
+        const stream = canvas.captureStream(30); // Increased to 30fps for smoother recording
+        const videoTrack = stream.getVideoTracks()[0];
+        const videoStream = new MediaStream([videoTrack]);
 
-      const mediaRecorder = new MediaRecorder(videoStream, {
-        mimeType: 'video/mp4; codecs="avc1.42E01E"', // H.264 codec
-        videoBitsPerSecond: 8000000 // 8Mbps for high quality
-      });
-
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          chunksRef.current.push(e.data);
-        }
-      };
-
-      mediaRecorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: 'video/mp4' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `halliday-gradient-${Date.now()}.mp4`;
-        a.click();
-        URL.revokeObjectURL(url);
-        chunksRef.current = [];
-        toast({
-          title: "Recording saved",
-          description: "Your gradient animation has been saved as an MP4 file.",
+        const mediaRecorder = new MediaRecorder(videoStream, {
+          mimeType: 'video/webm;codecs=h264',
+          videoBitsPerSecond: 8000000 // 8Mbps for high quality
         });
-      };
 
-      mediaRecorderRef.current = mediaRecorder;
-      mediaRecorder.start();
-      toast({
-        title: "Recording started",
-        description: "Recording your gradient animation...",
-      });
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) {
+            chunksRef.current.push(e.data);
+          }
+        };
+
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(chunksRef.current, { type: 'video/webm' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `halliday-gradient-${Date.now()}.webm`;
+          a.click();
+          URL.revokeObjectURL(url);
+          chunksRef.current = [];
+          toast({
+            title: "Recording saved",
+            description: "Your gradient animation has been saved as a video file.",
+          });
+        };
+
+        mediaRecorderRef.current = mediaRecorder;
+        mediaRecorder.start(1000 / 30); // Request data every frame
+        toast({
+          title: "Recording started",
+          description: "Recording your gradient animation...",
+        });
+      }, 100); // Small delay to ensure first frame is rendered
     } else if (!settings.isRecording && mediaRecorderRef.current) {
       // Stop recording
       mediaRecorderRef.current.stop();
