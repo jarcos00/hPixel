@@ -184,7 +184,7 @@ export default function ControlPanel({ settings, onSettingsChange }: Props) {
               value={[debouncedSize]}
               onValueChange={handlePixelSizeChange}
               min={5}
-              max={50}
+              max={100}
               step={1}
               className="w-full"
             />
@@ -196,7 +196,7 @@ export default function ControlPanel({ settings, onSettingsChange }: Props) {
               value={[debouncedSpacing]}
               onValueChange={handleSpacingChange}
               min={0}
-              max={10}
+              max={200}
               step={1}
               className="w-full"
             />
