@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Video, Download, Square, Image, ChevronDown } from "lucide-react";
+import { Video, Download, Square, Image } from "lucide-react";
 import { GradientSettings } from "@/pages/home";
 
 interface Props {
@@ -12,7 +12,6 @@ interface Props {
 export default function RecordingPanel({ settings, onSettingsChange }: Props) {
   const [duration, setDuration] = useState(0);
   const [recordingStartTime, setRecordingStartTime] = useState<number | null>(null);
-  const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -150,45 +149,22 @@ export default function RecordingPanel({ settings, onSettingsChange }: Props) {
     a.click();
   };
 
-  if (!isVisible) {
-    return (
-      <Button 
-        variant="ghost" 
-        onClick={() => setIsVisible(true)}
-        className="w-full flex items-center justify-center py-2"
-      >
-        <ChevronDown className="w-4 h-4 mr-2" />
-        Show Recording Controls
-      </Button>
-    );
-  }
-
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <Label className="text-lg">Recording Controls</Label>
-        <div className="flex items-center gap-4">
-          {settings.isRecording && (
-            <span className="text-sm font-medium text-red-500">
-              Recording: {duration}s
-            </span>
-          )}
-          <Button 
-            variant="ghost" 
-            onClick={() => setIsVisible(false)}
-            className="h-8"
-          >
-            <ChevronDown className="w-4 h-4 rotate-180" />
-            Hide
-          </Button>
-        </div>
+        <Label className="text-lg font-medium">Recording Controls</Label>
+        {settings.isRecording && (
+          <span className="text-sm font-medium text-red-500">
+            Recording: {duration}s
+          </span>
+        )}
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {!settings.isRecording ? (
           <Button
             onClick={handleStartRecording}
-            className="bg-white hover:bg-gray-50"
+            className="bg-gray-900 hover:bg-gray-800 text-white"
           >
             <Video className="w-4 h-4 mr-2" />
             Start Recording
@@ -196,7 +172,7 @@ export default function RecordingPanel({ settings, onSettingsChange }: Props) {
         ) : (
           <Button
             onClick={handleStopRecording}
-            className="bg-white hover:bg-gray-50"
+            className="bg-gray-900 hover:bg-gray-800 text-white"
           >
             <Square className="w-4 h-4 mr-2" />
             Stop Recording
@@ -204,7 +180,7 @@ export default function RecordingPanel({ settings, onSettingsChange }: Props) {
         )}
 
         <Button
-          className="bg-white hover:bg-gray-50"
+          className="bg-gray-900 hover:bg-gray-800 text-white"
           onClick={handleExportSVG}
         >
           <Download className="w-4 h-4 mr-2" />
@@ -212,7 +188,7 @@ export default function RecordingPanel({ settings, onSettingsChange }: Props) {
         </Button>
 
         <Button
-          className="bg-white hover:bg-gray-50"
+          className="bg-gray-900 hover:bg-gray-800 text-white"
           onClick={handleExportPNG}
         >
           <Image className="w-4 h-4 mr-2" />

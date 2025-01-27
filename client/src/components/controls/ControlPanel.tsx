@@ -3,8 +3,6 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Button } from "@/components/ui/button";
-import { ChevronDown } from "lucide-react";
 import { useState, useCallback } from "react";
 import {
   Accordion,
@@ -19,7 +17,6 @@ interface Props {
 }
 
 export default function ControlPanel({ settings, onSettingsChange }: Props) {
-  const [isVisible, setIsVisible] = useState(true);
   const [debouncedSize, setDebouncedSize] = useState(settings.pixelSize);
   const [debouncedSpacing, setDebouncedSpacing] = useState(settings.tileSpacing);
 
@@ -75,32 +72,9 @@ export default function ControlPanel({ settings, onSettingsChange }: Props) {
     }
   };
 
-  if (!isVisible) {
-    return (
-      <Button 
-        variant="ghost" 
-        onClick={() => setIsVisible(true)}
-        className="w-full flex items-center justify-center py-2"
-      >
-        <ChevronDown className="w-4 h-4 mr-2" />
-        Show Controls
-      </Button>
-    );
-  }
-
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-lg font-medium">Controls</h2>
-        <Button 
-          variant="ghost" 
-          onClick={() => setIsVisible(false)}
-          className="h-8"
-        >
-          <ChevronDown className="w-4 h-4 rotate-180" />
-          Hide
-        </Button>
-      </div>
+      <h2 className="text-lg font-medium">Controls</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="space-y-2">
@@ -206,7 +180,7 @@ export default function ControlPanel({ settings, onSettingsChange }: Props) {
 
       <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="effect-params">
-          <AccordionTrigger>Effect Parameters</AccordionTrigger>
+          <AccordionTrigger className="text-gray-800">Effect Parameters</AccordionTrigger>
           <AccordionContent>
             {settings.effectMode === "wavy" && (
               <div className="space-y-4">

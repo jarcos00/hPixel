@@ -3,6 +3,8 @@ import GradientCanvas from "@/components/canvas/GradientCanvas";
 import ControlPanel from "@/components/controls/ControlPanel";
 import RecordingPanel from "@/components/controls/RecordingPanel";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { ChevronDown } from "lucide-react";
 
 export type EffectMode = "wavy" | "orbit" | "hectic" | "free";
 
@@ -32,6 +34,7 @@ export interface GradientSettings {
 }
 
 export default function Home() {
+  const [isControlsVisible, setIsControlsVisible] = useState(true);
   const [settings, setSettings] = useState<GradientSettings>({
     effectMode: "wavy",
     backgroundColor: "#FFFFFF",
@@ -76,12 +79,31 @@ export default function Home() {
         <h1 className="text-2xl font-light text-foreground">Halliday Gradient</h1>
 
         <div className="mt-auto w-full max-w-6xl">
-          <Card className="p-6 bg-background/80 backdrop-blur">
-            <div className="flex flex-col gap-6">
-              <RecordingPanel settings={settings} onSettingsChange={handleSettingsChange} />
-              <ControlPanel settings={settings} onSettingsChange={handleSettingsChange} />
-            </div>
-          </Card>
+          {!isControlsVisible ? (
+            <Button 
+              className="w-full py-2 bg-white hover:bg-gray-100 text-gray-800"
+              onClick={() => setIsControlsVisible(true)}
+            >
+              <ChevronDown className="w-4 h-4 mr-2" />
+              Show Controls
+            </Button>
+          ) : (
+            <Card className="p-6" style={{ background: '#FFF !important', border: 'none !important', borderRadius: '12px' }}>
+              <div className="flex justify-end mb-4">
+                <Button 
+                  className="bg-white hover:bg-gray-100 text-gray-800"
+                  onClick={() => setIsControlsVisible(false)}
+                >
+                  <ChevronDown className="w-4 h-4 rotate-180 mr-2" />
+                  Hide Controls
+                </Button>
+              </div>
+              <div className="flex flex-col gap-6">
+                <RecordingPanel settings={settings} onSettingsChange={handleSettingsChange} />
+                <ControlPanel settings={settings} onSettingsChange={handleSettingsChange} />
+              </div>
+            </Card>
+          )}
         </div>
       </div>
     </div>
