@@ -76,13 +76,13 @@ export default function ControlPanel({ settings, onSettingsChange }: Props) {
     <div className="space-y-6">
       <h2 className="text-lg font-medium">Controls</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="space-y-6">
         <div className="space-y-2">
           <Label>Effect Mode</Label>
           <RadioGroup
             value={settings.effectMode}
             onValueChange={handleEffectChange}
-            className="flex flex-row md:flex-col space-x-4 md:space-x-0 md:space-y-2"
+            className="flex flex-col space-y-2"
           >
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="wavy" id="wavy" />
