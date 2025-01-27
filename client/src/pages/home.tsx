@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 
-export type EffectMode = "wavy" | "orbit" | "hectic" | "free";
+export type EffectMode = "wavy" | "orbit" | "hectic";
 
 export interface EffectParams {
   // Wavy parameters
@@ -18,9 +18,8 @@ export interface EffectParams {
   // Hectic parameters
   intensity: number;
   hecticSpeed: number;
-  // Free parameters
-  fluidity: number;
-  complexity: number;
+  // Common parameters
+  abstraction: number;
 }
 
 export interface GradientSettings {
@@ -52,9 +51,8 @@ export default function Home() {
       // Hectic default params
       intensity: 0.01,
       hecticSpeed: 1,
-      // Free default params
-      fluidity: 0.5,
-      complexity: 0.3
+      // Common params
+      abstraction: 0
     }
   });
 

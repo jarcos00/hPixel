@@ -96,11 +96,21 @@ export default function ControlPanel({ settings, onSettingsChange }: Props) {
               <RadioGroupItem value="hectic" id="hectic" />
               <Label htmlFor="hectic">Hectic</Label>
             </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="free" id="free" />
-              <Label htmlFor="free">Free</Label>
-            </div>
           </RadioGroup>
+        </div>
+
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>Abstraction ({settings.effectParams.abstraction.toFixed(2)})</Label>
+            <Slider
+              value={[settings.effectParams.abstraction]}
+              onValueChange={(v) => handleEffectParamChange('abstraction', v)}
+              min={0}
+              max={1}
+              step={0.1}
+              className="w-full"
+            />
+          </div>
         </div>
 
         <div className="space-y-4">
@@ -256,33 +266,6 @@ export default function ControlPanel({ settings, onSettingsChange }: Props) {
                     onValueChange={(v) => handleEffectParamChange('hecticSpeed', v)}
                     min={0.1}
                     max={3}
-                    step={0.1}
-                    className="w-full"
-                  />
-                </div>
-              </div>
-            )}
-
-            {settings.effectMode === "free" && (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Fluidity ({settings.effectParams.fluidity.toFixed(2)})</Label>
-                  <Slider
-                    value={[settings.effectParams.fluidity]}
-                    onValueChange={(v) => handleEffectParamChange('fluidity', v)}
-                    min={0.1}
-                    max={2}
-                    step={0.1}
-                    className="w-full"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Complexity ({settings.effectParams.complexity.toFixed(2)})</Label>
-                  <Slider
-                    value={[settings.effectParams.complexity]}
-                    onValueChange={(v) => handleEffectParamChange('complexity', v)}
-                    min={0.1}
-                    max={1}
                     step={0.1}
                     className="w-full"
                   />

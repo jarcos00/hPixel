@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Video, Download, Square, Image } from "lucide-react";
+import { Video, Download, Square, Image, Play } from "lucide-react";
 import { GradientSettings } from "@/pages/home";
+import { exportLottie } from "@/lib/gradientEffects";
 
 interface Props {
   settings: GradientSettings;
@@ -46,6 +47,17 @@ export default function RecordingPanel({ settings, onSettingsChange }: Props) {
     });
   };
 
+  const handleExportLottie = () => {
+    const lottieData = exportLottie(settings);
+    const blob = new Blob([JSON.stringify(lottieData)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `halliday-gradient-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handleExportSVG = () => {
     const canvas = document.querySelector('canvas');
     if (!canvas) return;
@@ -68,11 +80,13 @@ export default function RecordingPanel({ settings, onSettingsChange }: Props) {
     for (let x = 0; x < cols; x++) {
       for (let y = 0; y < rows; y++) {
         let opacity = 0;
+        const abstractionNoise = Math.sin(x * y * settings.effectParams.abstraction) * 0.5 + 0.5;
+
         switch (settings.effectMode) {
           case "wavy":
             opacity = Math.sin(
-              x * settings.effectParams.frequency + 
-              y * (settings.effectParams.frequency * 0.5) + 
+              x * settings.effectParams.frequency +
+              y * (settings.effectParams.frequency * 0.5) +
               time * settings.effectParams.amplitude
             ) * 0.5 + 0.5;
             break;
@@ -85,17 +99,9 @@ export default function RecordingPanel({ settings, onSettingsChange }: Props) {
           case "hectic":
             opacity = Math.sin(x * y * settings.effectParams.intensity + time * settings.effectParams.hecticSpeed) * 0.5 + 0.5;
             break;
-          case "free":
-            const nx = x * settings.effectParams.complexity * 0.1;
-            const ny = y * settings.effectParams.complexity * 0.1;
-            const t = time * settings.effectParams.fluidity * 0.5;
-            opacity = (
-              Math.sin(nx + t) * 0.4 +
-              Math.sin(ny - t * 0.5) * 0.4 +
-              Math.sin((nx + ny) * 0.5 + t * 0.7) * 0.2
-            ) * 0.5 + 0.5;
-            break;
         }
+
+        opacity = opacity * (1 - settings.effectParams.abstraction) + abstractionNoise * settings.effectParams.abstraction;
 
         rects += `
           <rect 
@@ -178,6 +184,14 @@ export default function RecordingPanel({ settings, onSettingsChange }: Props) {
             Stop Recording
           </Button>
         )}
+
+        <Button
+          className="w-full bg-gray-900 hover:bg-gray-800 text-white"
+          onClick={handleExportLottie}
+        >
+          <Play className="w-4 h-4 mr-2" />
+          Export Lottie
+        </Button>
 
         <Button
           className="w-full bg-gray-900 hover:bg-gray-800 text-white"
