@@ -5,17 +5,15 @@ import { useToast } from "@/hooks/use-toast";
 
 interface Props {
   settings: GradientSettings;
-  onFrameCapture?: (frameData: { time: number; pixels: { x: number; y: number; opacity: number }[] }) => void;
 }
 
-export default function GradientCanvas({ settings, onFrameCapture }: Props) {
+export default function GradientCanvas({ settings }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
   const timeRef = useRef<number>(0);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const { toast } = useToast();
-  const startTimeRef = useRef<number>(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -45,23 +43,9 @@ export default function GradientCanvas({ settings, onFrameCapture }: Props) {
       const deltaTime = timestamp - timeRef.current;
       timeRef.current = timestamp;
 
-      // Get frame data if recording
-      if (settings.isRecording && onFrameCapture) {
-        const frameTime = (timestamp - startTimeRef.current) / 1000; // Convert to seconds
-        const frameData = generateGradient(ctx, settings, deltaTime, true);
-        if (frameData) {
-          onFrameCapture({ time: frameTime, pixels: frameData });
-        }
-      } else {
-        generateGradient(ctx, settings, deltaTime, false);
-      }
-
+      generateGradient(ctx, settings, deltaTime);
       animationRef.current = requestAnimationFrame(animate);
     };
-
-    if (settings.isRecording) {
-      startTimeRef.current = performance.now();
-    }
 
     animationRef.current = requestAnimationFrame(animate);
 
@@ -71,7 +55,7 @@ export default function GradientCanvas({ settings, onFrameCapture }: Props) {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [settings, onFrameCapture]);
+  }, [settings]);
 
   // Handle recording state changes
   useEffect(() => {
@@ -80,13 +64,13 @@ export default function GradientCanvas({ settings, onFrameCapture }: Props) {
 
     if (settings.isRecording && !mediaRecorderRef.current) {
       // Start recording
-      const stream = canvas.captureStream(24);
+      const stream = canvas.captureStream(24); // 24fps
       const videoTrack = stream.getVideoTracks()[0];
       const videoStream = new MediaStream([videoTrack]);
 
       const mediaRecorder = new MediaRecorder(videoStream, {
-        mimeType: 'video/webm;codecs=h264',
-        videoBitsPerSecond: 8000000
+        mimeType: 'video/mp4; codecs="avc1.42E01E"', // H.264 codec
+        videoBitsPerSecond: 8000000 // 8Mbps for high quality
       });
 
       mediaRecorder.ondataavailable = (e) => {
@@ -96,17 +80,17 @@ export default function GradientCanvas({ settings, onFrameCapture }: Props) {
       };
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: 'video/webm' });
+        const blob = new Blob(chunksRef.current, { type: 'video/mp4' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `halliday-gradient-${Date.now()}.webm`;
+        a.download = `halliday-gradient-${Date.now()}.mp4`;
         a.click();
         URL.revokeObjectURL(url);
         chunksRef.current = [];
         toast({
           title: "Recording saved",
-          description: "Your gradient animation has been saved as a video file.",
+          description: "Your gradient animation has been saved as an MP4 file.",
         });
       };
 
