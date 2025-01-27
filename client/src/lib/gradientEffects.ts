@@ -79,26 +79,53 @@ export function exportLottie(settings: GradientSettings) {
     nm: "Halliday Gradient",
     ddd: 0,
     assets: [],
-    layers: [{
-      ty: 4,
-      sr: 1,
-      ao: 0,
-      shapes: [],
-      ip: 0,
-      op: frameCount,
-      st: 0,
-      bm: 0,
-      ddd: 0
-    }]
+    layers: [
+      // Background layer
+      {
+        ty: 1, // Solid type
+        sr: 1,
+        ao: 0,
+        sw: width,
+        sh: height,
+        sc: settings.backgroundColor,
+        ip: 0,
+        op: frameCount,
+        st: 0,
+        bm: 0,
+        ddd: 0
+      },
+      // Gradient layer
+      {
+        ty: 4,
+        sr: 1,
+        ao: 0,
+        shapes: [],
+        ip: 0,
+        op: frameCount,
+        st: 0,
+        bm: 0,
+        ddd: 0
+      }
+    ]
+  };
+
+  // Convert hex color to RGB for Lottie
+  const hexToRgb = (hex: string) => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? [
+      parseInt(result[1], 16) / 255,
+      parseInt(result[2], 16) / 255,
+      parseInt(result[3], 16) / 255
+    ] : [0, 0, 0];
   };
 
   // Add rectangles for each pixel
   for (let x = 0; x < cols; x++) {
     for (let y = 0; y < rows; y++) {
       const rect = {
-        ty: "rc",
+        ty: "rc",  // Rectangle shape
         d: 1,
-        p: {
+        p: {  // Position and size
           a: 0,
           k: [
             x * settings.pixelSize + settings.pixelSize / 2,
@@ -108,17 +135,17 @@ export function exportLottie(settings: GradientSettings) {
           ]
         },
         nm: `pixel_${x}_${y}`,
-        s: {
+        s: {  // Fill color
           a: 0,
-          k: settings.artColor
+          k: [...hexToRgb(settings.artColor), 1]
         },
-        o: {
+        o: {  // Opacity animation
           a: 1,
           k: generateOpacityKeyframes(x, y, settings, frameCount)
         }
       };
 
-      (lottieData.layers[0].shapes as any[]).push({ it: [rect] });
+      (lottieData.layers[1].shapes as any[]).push({ it: [rect] });
     }
   }
 
@@ -128,6 +155,8 @@ export function exportLottie(settings: GradientSettings) {
 function generateOpacityKeyframes(x: number, y: number, settings: GradientSettings, frameCount: number) {
   const keyframes = [];
   const { effectMode, effectParams } = settings;
+  const cols = Math.ceil(1920 / settings.pixelSize);
+  const rows = Math.ceil(1080 / settings.pixelSize);
 
   for (let frame = 0; frame < frameCount; frame++) {
     const time = frame / 60; // Convert frame to seconds
@@ -143,8 +172,8 @@ function generateOpacityKeyframes(x: number, y: number, settings: GradientSettin
         ) * 0.5 + 0.5;
         break;
       case "orbit":
-        const dx = x - 1920 / (2 * settings.pixelSize);
-        const dy = y - 1080 / (2 * settings.pixelSize);
+        const dx = x - cols / 2;
+        const dy = y - rows / 2;
         const dist = Math.sqrt(dx * dx + dy * dy) * effectParams.radius;
         opacity = Math.sin(dist - time * effectParams.orbitSpeed) * 0.5 + 0.5;
         break;
@@ -156,12 +185,13 @@ function generateOpacityKeyframes(x: number, y: number, settings: GradientSettin
         break;
     }
 
+    // Apply abstraction effect
     opacity = opacity * (1 - effectParams.abstraction) + abstractionNoise * effectParams.abstraction;
 
     keyframes.push({
       t: frame,
-      s: [opacity * 100],
-      h: 1
+      s: [opacity * 100], // Convert to percentage for Lottie
+      h: 0 // Set to 0 to enable interpolation between keyframes
     });
   }
 
