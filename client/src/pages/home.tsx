@@ -4,7 +4,22 @@ import ControlPanel from "@/components/controls/ControlPanel";
 import RecordingPanel from "@/components/controls/RecordingPanel";
 import { useState } from "react";
 
-export type EffectMode = "wavy" | "orbit" | "chaotic" | "free";
+export type EffectMode = "wavy" | "orbit" | "hectic" | "free";
+
+export interface EffectParams {
+  // Wavy parameters
+  frequency: number;
+  amplitude: number;
+  // Orbit parameters
+  radius: number;
+  orbitSpeed: number;
+  // Hectic parameters
+  intensity: number;
+  hecticSpeed: number;
+  // Free parameters
+  fluidity: number;
+  complexity: number;
+}
 
 export interface GradientSettings {
   effectMode: EffectMode;
@@ -13,6 +28,7 @@ export interface GradientSettings {
   pixelSize: number;
   tileSpacing: number;
   isRecording: boolean;
+  effectParams: EffectParams;
 }
 
 export default function Home() {
@@ -22,7 +38,21 @@ export default function Home() {
     artColor: "#3DF57B",
     pixelSize: 40,
     tileSpacing: 0,
-    isRecording: false
+    isRecording: false,
+    effectParams: {
+      // Wavy default params
+      frequency: 0.2,
+      amplitude: 0.5,
+      // Orbit default params
+      radius: 0.2,
+      orbitSpeed: 1,
+      // Hectic default params
+      intensity: 0.01,
+      hecticSpeed: 1,
+      // Free default params
+      fluidity: 0.5,
+      complexity: 0.3
+    }
   });
 
   const handleSettingsChange = (newSettings: GradientSettings) => {

@@ -6,7 +6,7 @@ export function generateGradient(
   deltaTime: number
 ) {
   const { width, height } = ctx.canvas;
-  const { pixelSize, backgroundColor, artColor, effectMode, tileSpacing } = settings;
+  const { pixelSize, backgroundColor, artColor, effectMode, tileSpacing, effectParams } = settings;
 
   // Clear canvas
   ctx.fillStyle = backgroundColor;
@@ -18,13 +18,9 @@ export function generateGradient(
 
   ctx.fillStyle = artColor;
 
-  // Random values for free mode
-  const randomValues = new Float32Array(cols * rows);
-  if (effectMode === "free") {
-    for (let i = 0; i < randomValues.length; i++) {
-      randomValues[i] = Math.random() * 2 * Math.PI;
-    }
-  }
+  // Precomputed values for free mode
+  const noiseScale = effectParams.complexity * 0.1;
+  const timeScale = effectParams.fluidity * 0.5;
 
   for (let x = 0; x < cols; x++) {
     for (let y = 0; y < rows; y++) {
@@ -32,25 +28,35 @@ export function generateGradient(
 
       switch (effectMode) {
         case "wavy":
-          opacity = Math.sin(x * 0.2 + y * 0.1 + time) * 0.5 + 0.5;
+          opacity = Math.sin(
+            x * effectParams.frequency + 
+            y * (effectParams.frequency * 0.5) + 
+            time * effectParams.amplitude
+          ) * 0.5 + 0.5;
           break;
         case "orbit":
           const dx = x - cols / 2;
           const dy = y - rows / 2;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          opacity = Math.sin(dist * 0.2 - time) * 0.5 + 0.5;
+          const dist = Math.sqrt(dx * dx + dy * dy) * effectParams.radius;
+          opacity = Math.sin(dist - time * effectParams.orbitSpeed) * 0.5 + 0.5;
           break;
-        case "chaotic":
-          opacity = Math.sin(x * y * 0.01 + time) * 0.5 + 0.5;
+        case "hectic":
+          opacity = Math.sin(
+            x * y * effectParams.intensity + 
+            time * effectParams.hecticSpeed
+          ) * 0.5 + 0.5;
           break;
         case "free":
-          // More random and dynamic free mode
-          const randIndex = y * cols + x;
-          const randPhase = randomValues[randIndex];
-          opacity = Math.sin(
-            time + randPhase + 
-            Math.sin(time * 0.5) * x * 0.1 + 
-            Math.cos(time * 0.3) * y * 0.1
+          // More fluid, less random animation using Perlin-like approach
+          const nx = x * noiseScale;
+          const ny = y * noiseScale;
+          const t = time * timeScale;
+
+          // Smooth wave combination for fluid motion
+          opacity = (
+            Math.sin(nx + t) * 0.4 +
+            Math.sin(ny - t * 0.5) * 0.4 +
+            Math.sin((nx + ny) * 0.5 + t * 0.7) * 0.2
           ) * 0.5 + 0.5;
           break;
       }

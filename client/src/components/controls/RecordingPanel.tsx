@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Video, Download, Square } from "lucide-react";
+import { Video, Download, Square, Image } from "lucide-react";
 import { GradientSettings } from "@/pages/home";
 
 interface Props {
@@ -71,19 +71,30 @@ export default function RecordingPanel({ settings, onSettingsChange }: Props) {
         let opacity = 0;
         switch (settings.effectMode) {
           case "wavy":
-            opacity = Math.sin(x * 0.2 + y * 0.1 + time) * 0.5 + 0.5;
+            opacity = Math.sin(
+              x * settings.effectParams.frequency + 
+              y * (settings.effectParams.frequency * 0.5) + 
+              time * settings.effectParams.amplitude
+            ) * 0.5 + 0.5;
             break;
           case "orbit":
             const dx = x - cols / 2;
             const dy = y - rows / 2;
             const dist = Math.sqrt(dx * dx + dy * dy);
-            opacity = Math.sin(dist * 0.2 - time) * 0.5 + 0.5;
+            opacity = Math.sin(dist * settings.effectParams.radius - time * settings.effectParams.orbitSpeed) * 0.5 + 0.5;
             break;
-          case "chaotic":
-            opacity = Math.sin(x * y * 0.01 + time) * 0.5 + 0.5;
+          case "hectic":
+            opacity = Math.sin(x * y * settings.effectParams.intensity + time * settings.effectParams.hecticSpeed) * 0.5 + 0.5;
             break;
           case "free":
-            opacity = Math.random() * 0.5 + 0.25; // Random but biased towards middle values
+            const nx = x * settings.effectParams.complexity * 0.1;
+            const ny = y * settings.effectParams.complexity * 0.1;
+            const t = time * settings.effectParams.fluidity * 0.5;
+            opacity = (
+              Math.sin(nx + t) * 0.4 +
+              Math.sin(ny - t * 0.5) * 0.4 +
+              Math.sin((nx + ny) * 0.5 + t * 0.7) * 0.2
+            ) * 0.5 + 0.5;
             break;
         }
 
@@ -106,12 +117,71 @@ export default function RecordingPanel({ settings, onSettingsChange }: Props) {
       </svg>
     `;
 
-    // Create download link
     const blob = new Blob([svg], { type: 'image/svg+xml' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = `halliday-gradient-${Date.now()}.svg`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportPNG = () => {
+    const canvas = document.querySelector('canvas');
+    if (!canvas) return;
+
+    // Create a new canvas at 3x resolution
+    const exportCanvas = document.createElement('canvas');
+    exportCanvas.width = canvas.width * 3;
+    exportCanvas.height = canvas.height * 3;
+
+    const ctx = exportCanvas.getContext('2d');
+    if (!ctx) return;
+
+    // Scale up the existing canvas
+    ctx.scale(3, 3);
+    ctx.drawImage(canvas, 0, 0);
+
+    // Convert to PNG and download
+    const url = exportCanvas.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `halliday-gradient-${Date.now()}@3x.png`;
+    a.click();
+  };
+
+  const handleExportLottie = () => {
+    // Generate Lottie animation data
+    const lottieData = {
+      v: "5.7.6",
+      fr: 60,
+      ip: 0,
+      op: 180, // 3 seconds at 60fps
+      w: 1920,
+      h: 1080,
+      nm: "Gradient Animation",
+      ddd: 0,
+      assets: [],
+      layers: [{
+        ty: 4,
+        sr: 1,
+        ao: 0,
+        shapes: [],
+        ip: 0,
+        op: 180,
+        st: 0,
+        bm: 0,
+        // Add animation keyframes based on current settings
+        // This is a simplified version, you'd need to add proper animation data
+        // based on the current effect mode and parameters
+      }]
+    };
+
+    const blob = new Blob([JSON.stringify(lottieData)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `halliday-gradient-${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -127,11 +197,10 @@ export default function RecordingPanel({ settings, onSettingsChange }: Props) {
         )}
       </div>
 
-      <div className="flex gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {!settings.isRecording ? (
           <Button
             onClick={handleStartRecording}
-            className="flex-1"
             variant="outline"
           >
             <Video className="w-4 h-4 mr-2" />
@@ -140,7 +209,6 @@ export default function RecordingPanel({ settings, onSettingsChange }: Props) {
         ) : (
           <Button
             onClick={handleStopRecording}
-            className="flex-1"
             variant="outline"
           >
             <Square className="w-4 h-4 mr-2" />
@@ -150,11 +218,26 @@ export default function RecordingPanel({ settings, onSettingsChange }: Props) {
 
         <Button
           variant="outline"
-          className="flex-1"
           onClick={handleExportSVG}
         >
           <Download className="w-4 h-4 mr-2" />
-          Export as SVG
+          Export SVG
+        </Button>
+
+        <Button
+          variant="outline"
+          onClick={handleExportPNG}
+        >
+          <Image className="w-4 h-4 mr-2" />
+          Export PNG @3x
+        </Button>
+
+        <Button
+          variant="outline"
+          onClick={handleExportLottie}
+        >
+          <Download className="w-4 h-4 mr-2" />
+          Export Lottie
         </Button>
       </div>
     </div>
