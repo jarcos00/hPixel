@@ -50,7 +50,7 @@ export default function RecordingPanel({ settings, onSettingsChange }: Props) {
     const canvas = document.querySelector('canvas');
     if (!canvas) return;
 
-    // Get the current canvas content
+    // Get canvas content and export as SVG
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
@@ -160,11 +160,11 @@ export default function RecordingPanel({ settings, onSettingsChange }: Props) {
         )}
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="flex flex-col gap-2 w-full">
         {!settings.isRecording ? (
           <Button
             onClick={handleStartRecording}
-            className="bg-gray-900 hover:bg-gray-800 text-white"
+            className="w-full bg-gray-900 hover:bg-gray-800 text-white"
           >
             <Video className="w-4 h-4 mr-2" />
             Start Recording
@@ -172,7 +172,7 @@ export default function RecordingPanel({ settings, onSettingsChange }: Props) {
         ) : (
           <Button
             onClick={handleStopRecording}
-            className="bg-gray-900 hover:bg-gray-800 text-white"
+            className="w-full bg-gray-900 hover:bg-gray-800 text-white"
           >
             <Square className="w-4 h-4 mr-2" />
             Stop Recording
@@ -180,7 +180,7 @@ export default function RecordingPanel({ settings, onSettingsChange }: Props) {
         )}
 
         <Button
-          className="bg-gray-900 hover:bg-gray-800 text-white"
+          className="w-full bg-gray-900 hover:bg-gray-800 text-white"
           onClick={handleExportSVG}
         >
           <Download className="w-4 h-4 mr-2" />
@@ -188,7 +188,7 @@ export default function RecordingPanel({ settings, onSettingsChange }: Props) {
         </Button>
 
         <Button
-          className="bg-gray-900 hover:bg-gray-800 text-white"
+          className="w-full bg-gray-900 hover:bg-gray-800 text-white"
           onClick={handleExportPNG}
         >
           <Image className="w-4 h-4 mr-2" />
