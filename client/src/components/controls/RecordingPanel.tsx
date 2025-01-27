@@ -50,21 +50,59 @@ export default function RecordingPanel({ settings, onSettingsChange }: Props) {
     const canvas = document.querySelector('canvas');
     if (!canvas) return;
 
+    // Get the current canvas content
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
     // Create SVG with the same dimensions as the canvas
     const width = canvas.width;
     const height = canvas.height;
 
-    // Generate SVG content based on current canvas state
+    // Generate a grid of rectangles based on current settings
+    const cols = Math.ceil(width / settings.pixelSize);
+    const rows = Math.ceil(height / settings.pixelSize);
+
+    let rects = '';
+    const time = performance.now() / 1000;
+
+    for (let x = 0; x < cols; x++) {
+      for (let y = 0; y < rows; y++) {
+        // Calculate opacity based on current effect mode
+        let opacity = 0;
+        switch (settings.effectMode) {
+          case "wavy":
+            opacity = Math.sin(x * 0.2 + y * 0.1 + time) * 0.5 + 0.5;
+            break;
+          case "orbit":
+            const dx = x - cols / 2;
+            const dy = y - rows / 2;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            opacity = Math.sin(dist * 0.2 - time) * 0.5 + 0.5;
+            break;
+          case "chaotic":
+            opacity = Math.sin(x * y * 0.01 + time) * 0.5 + 0.5;
+            break;
+          case "free":
+            opacity = Math.random() * 0.5 + 0.25; // Random but biased towards middle values
+            break;
+        }
+
+        rects += `
+          <rect 
+            x="${x * settings.pixelSize}" 
+            y="${y * settings.pixelSize}" 
+            width="${settings.pixelSize - settings.tileSpacing}" 
+            height="${settings.pixelSize - settings.tileSpacing}" 
+            fill="${settings.artColor}"
+            opacity="${opacity.toFixed(3)}"
+          />`;
+      }
+    }
+
     const svg = `
       <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <pattern id="gradient-pattern" width="${settings.pixelSize}" height="${settings.pixelSize}" patternUnits="userSpaceOnUse">
-            <rect width="${settings.pixelSize - settings.tileSpacing}" height="${settings.pixelSize - settings.tileSpacing}" 
-                  fill="${settings.artColor}" opacity="0.5"/>
-          </pattern>
-        </defs>
         <rect width="${width}" height="${height}" fill="${settings.backgroundColor}"/>
-        <rect width="${width}" height="${height}" fill="url(#gradient-pattern)"/>
+        ${rects}
       </svg>
     `;
 
