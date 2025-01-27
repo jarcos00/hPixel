@@ -67,7 +67,6 @@ export default function RecordingPanel({ settings, onSettingsChange }: Props) {
 
     for (let x = 0; x < cols; x++) {
       for (let y = 0; y < rows; y++) {
-        // Calculate opacity based on current effect mode
         let opacity = 0;
         switch (settings.effectMode) {
           case "wavy":
@@ -150,42 +149,6 @@ export default function RecordingPanel({ settings, onSettingsChange }: Props) {
     a.click();
   };
 
-  const handleExportLottie = () => {
-    // Generate Lottie animation data
-    const lottieData = {
-      v: "5.7.6",
-      fr: 60,
-      ip: 0,
-      op: 180, // 3 seconds at 60fps
-      w: 1920,
-      h: 1080,
-      nm: "Gradient Animation",
-      ddd: 0,
-      assets: [],
-      layers: [{
-        ty: 4,
-        sr: 1,
-        ao: 0,
-        shapes: [],
-        ip: 0,
-        op: 180,
-        st: 0,
-        bm: 0,
-        // Add animation keyframes based on current settings
-        // This is a simplified version, you'd need to add proper animation data
-        // based on the current effect mode and parameters
-      }]
-    };
-
-    const blob = new Blob([JSON.stringify(lottieData)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `halliday-gradient-${Date.now()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
@@ -197,7 +160,7 @@ export default function RecordingPanel({ settings, onSettingsChange }: Props) {
         )}
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {!settings.isRecording ? (
           <Button
             onClick={handleStartRecording}
@@ -230,14 +193,6 @@ export default function RecordingPanel({ settings, onSettingsChange }: Props) {
         >
           <Image className="w-4 h-4 mr-2" />
           Export PNG @3x
-        </Button>
-
-        <Button
-          variant="outline"
-          onClick={handleExportLottie}
-        >
-          <Download className="w-4 h-4 mr-2" />
-          Export Lottie
         </Button>
       </div>
     </div>

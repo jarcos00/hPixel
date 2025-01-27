@@ -3,6 +3,9 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Button } from "@/components/ui/button";
+import { ChevronDown } from "lucide-react";
+import { useState, useCallback } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -16,6 +19,10 @@ interface Props {
 }
 
 export default function ControlPanel({ settings, onSettingsChange }: Props) {
+  const [isVisible, setIsVisible] = useState(true);
+  const [debouncedSize, setDebouncedSize] = useState(settings.pixelSize);
+  const [debouncedSpacing, setDebouncedSpacing] = useState(settings.tileSpacing);
+
   const handleEffectChange = (value: string) => {
     onSettingsChange({
       ...settings,
@@ -33,19 +40,30 @@ export default function ControlPanel({ settings, onSettingsChange }: Props) {
     });
   };
 
-  const handlePixelSizeChange = (value: number[]) => {
-    onSettingsChange({
-      ...settings,
-      pixelSize: value[0]
-    });
-  };
+  // Debounced handlers for pixel size and spacing
+  const handlePixelSizeChange = useCallback((value: number[]) => {
+    setDebouncedSize(value[0]);
+    const timeoutId = setTimeout(() => {
+      onSettingsChange({
+        ...settings,
+        pixelSize: value[0]
+      });
+    }, 100); // 100ms debounce
 
-  const handleSpacingChange = (value: number[]) => {
-    onSettingsChange({
-      ...settings,
-      tileSpacing: value[0]
-    });
-  };
+    return () => clearTimeout(timeoutId);
+  }, [settings, onSettingsChange]);
+
+  const handleSpacingChange = useCallback((value: number[]) => {
+    setDebouncedSpacing(value[0]);
+    const timeoutId = setTimeout(() => {
+      onSettingsChange({
+        ...settings,
+        tileSpacing: value[0]
+      });
+    }, 100); // 100ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [settings, onSettingsChange]);
 
   const handleColorChange = (type: 'backgroundColor' | 'artColor', value: string) => {
     const colorValue = value.replace('#', '');
@@ -57,8 +75,33 @@ export default function ControlPanel({ settings, onSettingsChange }: Props) {
     }
   };
 
+  if (!isVisible) {
+    return (
+      <Button 
+        variant="ghost" 
+        onClick={() => setIsVisible(true)}
+        className="w-full flex items-center justify-center py-2"
+      >
+        <ChevronDown className="w-4 h-4 mr-2" />
+        Show Controls
+      </Button>
+    );
+  }
+
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-lg font-medium">Controls</h2>
+        <Button 
+          variant="ghost" 
+          onClick={() => setIsVisible(false)}
+          className="h-8"
+        >
+          <ChevronDown className="w-4 h-4 rotate-180" />
+          Hide
+        </Button>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="space-y-2">
           <Label>Effect Mode</Label>
@@ -136,9 +179,9 @@ export default function ControlPanel({ settings, onSettingsChange }: Props) {
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label>Pixel Size ({settings.pixelSize}px)</Label>
+            <Label>Pixel Size ({debouncedSize}px)</Label>
             <Slider
-              value={[settings.pixelSize]}
+              value={[debouncedSize]}
               onValueChange={handlePixelSizeChange}
               min={5}
               max={50}
@@ -148,9 +191,9 @@ export default function ControlPanel({ settings, onSettingsChange }: Props) {
           </div>
 
           <div className="space-y-2">
-            <Label>Tile Spacing ({settings.tileSpacing}px)</Label>
+            <Label>Tile Spacing ({debouncedSpacing}px)</Label>
             <Slider
-              value={[settings.tileSpacing]}
+              value={[debouncedSpacing]}
               onValueChange={handleSpacingChange}
               min={0}
               max={10}
