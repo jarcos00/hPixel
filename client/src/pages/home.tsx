@@ -35,22 +35,24 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen w-full p-4 bg-background flex flex-col items-center gap-4">
-      <h1 className="text-2xl font-light text-foreground">Halliday Gradient</h1>
+    <div className="min-h-screen w-full bg-background">
+      {/* Full screen canvas */}
+      <div className="fixed inset-0">
+        <GradientCanvas settings={settings} />
+      </div>
 
-      <div className="w-full max-w-6xl flex flex-col gap-4">
-        <Card className="p-4">
-          <div className="aspect-video w-full">
-            <GradientCanvas settings={settings} />
-          </div>
-        </Card>
+      {/* Content overlay */}
+      <div className="relative z-10 min-h-screen w-full p-4 flex flex-col items-center gap-4">
+        <h1 className="text-2xl font-light text-foreground">Halliday Gradient</h1>
 
-        <Card className="p-6">
-          <div className="flex flex-col gap-6">
-            <RecordingPanel settings={settings} onSettingsChange={handleSettingsChange} />
-            <ControlPanel settings={settings} onSettingsChange={handleSettingsChange} />
-          </div>
-        </Card>
+        <div className="mt-auto w-full max-w-6xl">
+          <Card className="p-6 bg-background/80 backdrop-blur">
+            <div className="flex flex-col gap-6">
+              <RecordingPanel settings={settings} onSettingsChange={handleSettingsChange} />
+              <ControlPanel settings={settings} onSettingsChange={handleSettingsChange} />
+            </div>
+          </Card>
+        </div>
       </div>
     </div>
   );

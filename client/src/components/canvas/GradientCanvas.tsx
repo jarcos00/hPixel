@@ -26,17 +26,14 @@ export default function GradientCanvas({ settings }: Props) {
       const container = canvas.parentElement;
       if (!container) return;
 
-      // Set canvas size to 16:9 aspect ratio
-      const width = container.clientWidth;
-      const height = width * (9/16);
-
-      // For high-quality exports, use 1920x1080 as internal resolution
-      canvas.width = 1920;
+      // Set canvas size to match container
+      canvas.width = 1920; // Fixed internal resolution
       canvas.height = 1080;
 
-      // Set display size
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
+      // Set display size to fill container
+      canvas.style.width = '100%';
+      canvas.style.height = '100%';
+      canvas.style.objectFit = 'cover';
 
       // Set CSS to prevent blurry rendering
       canvas.style.imageRendering = 'pixelated';
@@ -73,8 +70,13 @@ export default function GradientCanvas({ settings }: Props) {
     if (settings.isRecording && !mediaRecorderRef.current) {
       // Start recording
       const stream = canvas.captureStream(24); // 24fps
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'video/webm',
+      const videoTrack = stream.getVideoTracks()[0];
+
+      // Create a new MediaStream with only the video track
+      const videoStream = new MediaStream([videoTrack]);
+
+      const mediaRecorder = new MediaRecorder(videoStream, {
+        mimeType: 'video/mp4; codecs="avc1.42E01E"', // H.264 codec
         videoBitsPerSecond: 8000000 // 8Mbps for high quality
       });
 
@@ -85,17 +87,17 @@ export default function GradientCanvas({ settings }: Props) {
       };
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: 'video/webm' });
+        const blob = new Blob(chunksRef.current, { type: 'video/mp4' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `halliday-gradient-${Date.now()}.webm`;
+        a.download = `halliday-gradient-${Date.now()}.mp4`;
         a.click();
         URL.revokeObjectURL(url);
         chunksRef.current = [];
         toast({
           title: "Recording saved",
-          description: "Your gradient animation has been saved as a video file.",
+          description: "Your gradient animation has been saved as an MP4 file.",
         });
       };
 

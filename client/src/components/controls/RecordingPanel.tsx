@@ -46,6 +46,38 @@ export default function RecordingPanel({ settings, onSettingsChange }: Props) {
     });
   };
 
+  const handleExportSVG = () => {
+    const canvas = document.querySelector('canvas');
+    if (!canvas) return;
+
+    // Create SVG with the same dimensions as the canvas
+    const width = canvas.width;
+    const height = canvas.height;
+
+    // Generate SVG content based on current canvas state
+    const svg = `
+      <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="gradient-pattern" width="${settings.pixelSize}" height="${settings.pixelSize}" patternUnits="userSpaceOnUse">
+            <rect width="${settings.pixelSize - settings.tileSpacing}" height="${settings.pixelSize - settings.tileSpacing}" 
+                  fill="${settings.artColor}" opacity="0.5"/>
+          </pattern>
+        </defs>
+        <rect width="${width}" height="${height}" fill="${settings.backgroundColor}"/>
+        <rect width="${width}" height="${height}" fill="url(#gradient-pattern)"/>
+      </svg>
+    `;
+
+    // Create download link
+    const blob = new Blob([svg], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `halliday-gradient-${Date.now()}.svg`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
@@ -81,9 +113,7 @@ export default function RecordingPanel({ settings, onSettingsChange }: Props) {
         <Button
           variant="outline"
           className="flex-1"
-          onClick={() => {
-            // SVG export logic will be added here
-          }}
+          onClick={handleExportSVG}
         >
           <Download className="w-4 h-4 mr-2" />
           Export as SVG
