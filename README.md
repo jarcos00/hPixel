@@ -27,7 +27,9 @@ npm run dev
 This project is configured to deploy automatically to GitHub Pages when pushing to the main branch. To deploy manually:
 
 1. Fork this repository
-2. Enable GitHub Pages in your repository settings
+2. Enable GitHub Pages in your repository settings:
+   - Go to repository Settings > Pages
+   - Under "Build and deployment", select "GitHub Actions" as the source
 3. Push to the main branch
 
 The site will be available at `https://[your-username].github.io/[repository-name]/`
