@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "hPixel" ]
   workflow_dispatch:
 
 permissions:
@@ -15,21 +15,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-          
+
       - name: Install dependencies
         run: npm ci
-        
+
       - name: Build
         run: npm run build
         env:
           VITE_BASE_URL: '/${{ github.event.repository.name }}'
-          
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
